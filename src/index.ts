@@ -1,4 +1,5 @@
 import * as Fingerprint2 from 'fingerprintjs2';
+import { UserProfile } from 'types';
 
 export class WllWebSdk {
 
@@ -122,7 +123,7 @@ export class WllWebSdk {
     callback(userProfile);
   } 
 
-  public async fillUserDetails(userProfile: any, callback: any) {
+  public async fillUserDetails(userProfile: UserProfile, callback: any) {
 
     console.log("User profile submitted:");
     console.log(userProfile);
