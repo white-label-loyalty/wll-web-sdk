@@ -24,10 +24,10 @@ You can also just download these js files and place them in your website's js fo
 
 Initialize the SDK
 ```js
-var wll = new WllWebSdk.WllWebSdk(); # Get the object
-var apiKey = "abc123"; # API Key that you got on registration
+var wll = new WllWebSdk.WllWebSdk(); // Get the object
+var apiKey = "abc123"; // API Key that you got on registration
 
-# Initialize the SDK
+// Initialize the SDK
 const userToken = wll.init(apiKey, "campaign-ABC", 
   userToken => 
   {
