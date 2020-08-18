@@ -1,9 +1,3 @@
-// export const sum = (a: number, b: number) => {
-//   if ('development' === process.env.NODE_ENV) {
-//     console.log('boop');
-//   }
-//   return a + b;
-// };
 import * as Fingerprint2 from 'fingerprintjs2';
 
 export class WllWebSdk {
@@ -304,21 +298,4 @@ export class WllWebSdk {
       
     });
    }
-  
-  
-
-    // private loadScript(url: string)
-    // {
-    //     // Adding the script tag to the head as suggested before
-    //     console.log("Loading script:" + url)
-    //     return new Promise(function (resolve, reject) {
-    //       var s;
-    //       s = document.createElement('script');
-    //       s.src = url;
-    //       s.type = 'text/javascript';
-    //       s.onload = resolve;
-    //       s.onerror = reject;
-    //       document.head.appendChild(s);
-    //   });
-    // }
 }
