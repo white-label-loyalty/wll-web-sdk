@@ -69,18 +69,18 @@ export class WllWebSdk {
     // else this.fillUserDetails(user)
 
     if (!this.apiKey || !this.campaignId || !this.userToken || !this.sessionId) {
-      throw Error("SDK hasn't been initialized yet. Call init() first!")
+      throw new Error("SDK hasn't been initialized yet. Call init() first!")
     }
 
     if (!emailAddress) {
-      throw Error("Provide a valid email address");
+      throw new Error("Provide a valid email address");
     }
 
     let userProfile;
     if (this.userToken.userProfile && this.userToken.userProfile.emailAddress && this.userToken.userProfile.emailAddress !== emailAddress) {
       // USE CASE: If email address doesn't match the session user profile, this might be another visitor
       // logout();
-      throw Error("Email address doesn't match existing user profile")
+      throw new Error("Email address doesn't match existing user profile")
     } else if (this.userToken.userProfile && this.userToken.userProfile.emailAddress && this.userToken.userProfile.emailAddress === emailAddress) {
        // Use existing profile if the email address matches, no need to sign in
        // USE CASE: Mostly used for users whose profiles (at least with an email address) our systems could find based on their user token hash.
@@ -138,16 +138,16 @@ export class WllWebSdk {
       console.log(userProfile);
     }
     if (!this.apiKey || !this.campaignId || !this.userToken || !this.sessionId) {
-      throw Error("SDK hasn't been initialized yet. Call init() first!")
+      throw new Error("SDK hasn't been initialized yet. Call init() first!")
     }
 
     if (!this.userToken.userProfile || !this.userToken.userProfile.emailAddress) {
-      throw Error("The user hasn't been signedUp yet! Sign up using email first");
+      throw new Error("The user hasn't been signedUp yet! Sign up using email first");
     }
 
     if (this.userToken.userProfile && this.userToken.userProfile.emailAddress && this.userToken.userProfile.emailAddress !== userProfile.emailAddress) {
       // Something really wrong happened here. The emailAddress matching should have happened during signup.
-      throw Error("Email address doesn't match existing user profile")
+      throw new Error("Email address doesn't match existing user profile")
     }
 
     const userProfileSaved = await new Promise(async (resolve, reject) => {
