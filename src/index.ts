@@ -15,24 +15,32 @@ export class WllWebSdk {
     // Check session storage and see if we already have session token and user token
     let sessionUserToken =  sessionStorage.getItem('hash');
     let sessionId =  sessionStorage.getItem('sessionId');
-    console.log("Init, checking session storage");
-    console.log(sessionId)
-    console.log(sessionUserToken)
+    if ('development' === process.env.NODE_ENV) {
+      console.log("Init, checking session storage");
+      console.log(sessionId)
+      console.log(sessionUserToken)
+    }
     if (sessionId && sessionUserToken) {
-      console.log( 'Init sdk, sessionId exists: ' + sessionId);
+      if ('development' === process.env.NODE_ENV) {
+        console.log( 'Init sdk, sessionId exists: ' + sessionId);
+      }
       this.sessionId = sessionId;
       this.userToken = JSON.parse(sessionUserToken);
       callback(this.userToken);
     } else {
       // if session id isn't available, make a new session
       if( document.readyState !== 'loading' ) {
-          console.log( 'Init sdk, document is already ready, just execute code here' );
+          if ('development' === process.env.NODE_ENV) {
+            console.log( 'Init sdk, document is already ready, just execute code here' );
+          }
           const userToken = await this.getHashTokenAndFingerprint();
           callback(userToken);
       } else {
         const _this = this;
           document.addEventListener('DOMContentLoaded', async function () {
+            if ('development' === process.env.NODE_ENV) {
               console.log( 'Init sdk, document was not ready, place code here' );
+            }
             const userToken = await _this.getHashTokenAndFingerprint();
             callback(userToken);
           });
@@ -89,10 +97,8 @@ export class WllWebSdk {
           }
         }
 
-        // console.log("data:" + JSON.stringify(data))
-
-        const baseUrl = "http://127.0.0.1:8080/v1";
-        let response = await fetch( baseUrl + '/user_tokens/' + this.userToken.token + '/anon_user_profile', {
+        const baseUrl = process.env.REWARDS_API_URL;
+        let response = await fetch( baseUrl + 'user_tokens/' + this.userToken.token + '/anon_user_profile', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -101,7 +107,9 @@ export class WllWebSdk {
           },
           body: JSON.stringify(data),
         });
-        console.log(response)
+        if ('development' === process.env.NODE_ENV) {
+          console.log(response)
+        }
 
         if (response.ok) {
           let responseData = await response.json();
@@ -125,8 +133,10 @@ export class WllWebSdk {
 
   public async fillUserDetails(userProfile: UserProfile, callback: any) {
 
-    console.log("User profile submitted:");
-    console.log(userProfile);
+    if ('development' === process.env.NODE_ENV) {
+      console.log("User profile submitted:");
+      console.log(userProfile);
+    }
     if (!this.apiKey || !this.campaignId || !this.userToken || !this.sessionId) {
       throw Error("SDK hasn't been initialized yet. Call init() first!")
     }
@@ -147,10 +157,12 @@ export class WllWebSdk {
         userProfile: userProfile
       }
 
-      console.log("data:" + JSON.stringify(data))
+      if ('development' === process.env.NODE_ENV) {
+        console.log("data:" + JSON.stringify(data))
+      }
 
-      const baseUrl = "http://127.0.0.1:8080/v1";
-      let response = await fetch( baseUrl + '/user_tokens/' + this.userToken.token + '/anon_user_profile', {
+      const baseUrl = process.env.REWARDS_API_URL;
+      let response = await fetch( baseUrl + 'user_tokens/' + this.userToken.token + '/anon_user_profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +171,9 @@ export class WllWebSdk {
         },
         body: JSON.stringify(data),
       });
-      console.log(response)
+      if ('development' === process.env.NODE_ENV) {
+        console.log(response)
+      }
 
       if (response.ok) {
         let responseData = await response.json();
@@ -195,66 +209,74 @@ export class WllWebSdk {
   
     private async getHashTokenAndFingerprint() {
       const x =  this.getParams(window.location.href);
-      console.log("params", x);
+      if ('development' === process.env.NODE_ENV) {
+        console.log("params", x);
+      }
       if (!x.hash) {
         window.location.replace("http://fphub.wlloyalty.net" + 
           "?id=" + this.apiKey + "&loc=" + window.location.href);
       } else {
-          console.log("got the hash", x.hash);
-          document.getElementById("hash")!.innerHTML = "Here's your hash token: " + x.hash;
+          if ('development' === process.env.NODE_ENV) {
+            console.log("got the hash", x.hash);
+          }
           window.history.replaceState(null, "", window.location.pathname);
           // await this.loadScript("../node_modules/wll-web-sdk/dist/pf.min.js");
           const fingerprintComponents = await this.getFingerprint();
           try {
             
             const sessionData: any = await this.createUserSession(x.hash, fingerprintComponents, this.campaignId!);
-            console.log(sessionData);
+            if ('development' === process.env.NODE_ENV) {
+              console.log(sessionData);
+            }
             this.sessionId = sessionData.data.id;
             this.userToken = sessionData.data.userToken;
             sessionStorage.setItem('hash', JSON.stringify(this.userToken));
             sessionStorage.setItem('sessionId', this.sessionId!);
             return this.userToken;
           } catch (err) {
-            console.error("Error while creating session: " + JSON.stringify(err))
+            if ('development' === process.env.NODE_ENV) {
+              console.error("Error while creating session: " + JSON.stringify(err))
+            }
           }
         }
     }
 
     private async getFingerprint() {
-      console.log("Getting fingerprint")
+      if ('development' === process.env.NODE_ENV) {
+        console.log("Getting fingerprint")
+      }
       return new Promise(async (resolve) => {
         
             setTimeout(async function () {
                 Fingerprint2.get(async function (components: any) {
-                  console.log(components) // an array of components: {key: ..., value: ...}
-                  //  var values = components.map(function (component) { return component.value })
+                  if ('development' === process.env.NODE_ENV) {
+                    console.log(components) // an array of components: {key: ..., value: ...}
+                  }
                   var canvas =  components.find((component: any) => component.key === "canvas");
                           var canvasValues = canvas.value;
                           var canvasValuesString = canvasValues.join('');
 
-                          console.log("canvas" + canvasValuesString)
+                          if ('development' === process.env.NODE_ENV) {
+                            console.log("canvas" + canvasValuesString)
+                          }
                           var fonts =  components.find((component: any) => component.key === "fonts");
                           var fontsValues = fonts.value;
                           var fontsValueString = fontsValues.join('');
-                          console.log("fonts" + fontsValueString)
+                          if ('development' === process.env.NODE_ENV) {
+                            console.log("fonts" + fontsValueString)
+                          }
 
                       // var murmur = Fingerprint2.x64hash128(values.join(''), 31) 
                       var murmur = Fingerprint2.x64hash128(canvasValuesString+fontsValueString, 31)                         
-                      console.log("fingerprint: "+ murmur);
+                      if ('development' === process.env.NODE_ENV) {
+                        console.log("fingerprint: "+ murmur);
+                      }
                       if (components) {
                         components.push({hash: murmur})
                       }
-                      document.getElementById("fingerprint")!.innerHTML = "Here's your fingerprint: " + murmur;
                       resolve(components);
           // Call backend API to create session and then save session token and user token in session storage
           // also the user entity is saved locally here, and fetched using getExistingUser
-          // await loadScript("auth0.min.js");
-          // try {
-          //   const accessToken = await getManagementAuthToken();
-          //   console.log("Access token final:" + accessToken);
-          // } catch (err) {
-          //   console.log("Got an error:" + JSON.stringify(err));
-          // }
           })  
         }, 500)  
     });
@@ -271,10 +293,12 @@ export class WllWebSdk {
       }
 
       // console.log("data:" + JSON.stringify(data))
-      console.log(this.apiKey);
+      if ('development' === process.env.NODE_ENV) {
+        console.log(this.apiKey);
+      }
 
-      const baseUrl = "http://127.0.0.1:8080/v1";
-      let response = await fetch( baseUrl + '/user_tokens/' + token + '/user_sessions', {
+      const baseUrl = process.env.REWARDS_API_URL;
+      let response = await fetch( baseUrl + 'user_tokens/' + token + '/user_sessions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -283,7 +307,9 @@ export class WllWebSdk {
         },
         body: JSON.stringify(data),
       });
-      console.log(response)
+      if ('development' === process.env.NODE_ENV) {
+        console.log(response)
+      }
 
       if (response.ok) {
         let responseData = await response.json();
