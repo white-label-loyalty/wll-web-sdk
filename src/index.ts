@@ -54,7 +54,7 @@ export class WllWebSdk {
     // this returns a user entity after init, and if present then there is no need for the client
     // to verify email. 
     // also, they can show the email id in a welcome msg
-    return this.userToken.userProfile;
+    return this.userToken.profile;
   }
 
   // if existinguser if available, clients needs to show welcome and logout/not you(?) button
@@ -77,28 +77,28 @@ export class WllWebSdk {
     }
 
     let userProfile;
-    if (this.userToken.userProfile && this.userToken.userProfile.emailAddress && this.userToken.userProfile.emailAddress !== emailAddress) {
+    if (this.userToken.profile && this.userToken.profile.emailAddress && this.userToken.profile.emailAddress !== emailAddress) {
       // USE CASE: If email address doesn't match the session user profile, this might be another visitor
       // logout();
       throw new Error("Email address doesn't match existing user profile")
-    } else if (this.userToken.userProfile && this.userToken.userProfile.emailAddress && this.userToken.userProfile.emailAddress === emailAddress) {
+    } else if (this.userToken.profile && this.userToken.profile.emailAddress && this.userToken.profile.emailAddress === emailAddress) {
        // Use existing profile if the email address matches, no need to sign in
        // USE CASE: Mostly used for users whose profiles (at least with an email address) our systems could find based on their user token hash.
-      userProfile = this.userToken.userProfile;
+      userProfile = this.userToken.profile;
     } else { 
       // Sign in and get existing profile details from server if no userProfile exists in session
       // USE CASE: Mostly used for new users, or users whose user token hash didn't exist in our system to fetch a user profile.
       userProfile = await new Promise(async (resolve, reject) => {
 
         const data = {
-          sessionId: this.sessionId,
-          userProfile: {
+          token: this.userToken.token,
+          profile: {
             emailAddress: emailAddress
           }
         }
 
         const baseUrl = process.env.REWARDS_API_URL;
-        let response = await fetch( baseUrl + 'user_tokens/' + this.userToken.token + '/anon_user_profile', {
+        let response = await fetch( baseUrl + 'user_sessions/' + this.sessionId + '/profile', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -126,7 +126,7 @@ export class WllWebSdk {
       });
     }
 
-    this.userToken.userProfile = userProfile;
+    this.userToken.profile = userProfile;
     sessionStorage.setItem('hash', JSON.stringify(this.userToken));
     callback(userProfile);
   } 
@@ -141,11 +141,11 @@ export class WllWebSdk {
       throw new Error("SDK hasn't been initialized yet. Call init() first!")
     }
 
-    if (!this.userToken.userProfile || !this.userToken.userProfile.emailAddress) {
+    if (!this.userToken.profile || !this.userToken.profile.emailAddress) {
       throw new Error("The user hasn't been signedUp yet! Sign up using email first");
     }
 
-    if (this.userToken.userProfile && this.userToken.userProfile.emailAddress && this.userToken.userProfile.emailAddress !== userProfile.emailAddress) {
+    if (this.userToken.profile && this.userToken.profile.emailAddress && this.userToken.profile.emailAddress !== userProfile.emailAddress) {
       // Something really wrong happened here. The emailAddress matching should have happened during signup.
       throw new Error("Email address doesn't match existing user profile")
     }
@@ -153,8 +153,8 @@ export class WllWebSdk {
     const userProfileSaved = await new Promise(async (resolve, reject) => {
 
       const data = {
-        sessionId: this.sessionId,
-        userProfile: userProfile
+        token: this.userToken.token,
+        profile: userProfile
       }
 
       if ('development' === process.env.NODE_ENV) {
@@ -162,7 +162,7 @@ export class WllWebSdk {
       }
 
       const baseUrl = process.env.REWARDS_API_URL;
-      let response = await fetch( baseUrl + 'user_tokens/' + this.userToken.token + '/anon_user_profile', {
+      let response = await fetch( baseUrl + 'user_sessions/' + this.sessionId + '/profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -189,7 +189,7 @@ export class WllWebSdk {
       
     });
 
-    this.userToken.userProfile = userProfileSaved;
+    this.userToken.profile = userProfileSaved;
     sessionStorage.setItem('hash', JSON.stringify(this.userToken));
     callback(userProfileSaved);
   }
@@ -289,7 +289,8 @@ export class WllWebSdk {
       const data = {
         source: 'CAMPAIGN',
         sourceId: campaignId,
-        deviceFingerprint: fingerprint
+        deviceFingerprint: fingerprint,
+        token: token
       }
 
       // console.log("data:" + JSON.stringify(data))
@@ -298,7 +299,7 @@ export class WllWebSdk {
       }
 
       const baseUrl = process.env.REWARDS_API_URL;
-      let response = await fetch( baseUrl + 'user_tokens/' + token + '/user_sessions', {
+      let response = await fetch( baseUrl + 'user_sessions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
