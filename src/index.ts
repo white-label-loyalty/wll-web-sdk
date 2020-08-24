@@ -26,23 +26,32 @@ export class WllWebSdk {
       }
       this.sessionId = sessionId;
       this.userToken = JSON.parse(sessionUserToken);
-      callback(this.userToken);
+      callback(null, this.userToken);
     } else {
       // if session id isn't available, make a new session
       if( document.readyState !== 'loading' ) {
           if ('development' === process.env.NODE_ENV) {
             console.log( 'Init sdk, document is already ready, just execute code here' );
           }
-          const userToken = await this.getHashTokenAndFingerprint();
-          callback(userToken);
+          try {
+            const userToken = await this.getHashTokenAndFingerprint();
+            callback(null, userToken);
+          } catch (err) {
+            callback(err);
+          }
+          
       } else {
         const _this = this;
           document.addEventListener('DOMContentLoaded', async function () {
             if ('development' === process.env.NODE_ENV) {
               console.log( 'Init sdk, document was not ready, place code here' );
             }
-            const userToken = await _this.getHashTokenAndFingerprint();
-            callback(userToken);
+            try {
+              const userToken = await _this.getHashTokenAndFingerprint();
+              callback(null, userToken);
+            } catch (err) {
+              callback(err);
+            }
           });
       }
     }
@@ -69,66 +78,74 @@ export class WllWebSdk {
     // else this.fillUserDetails(user)
 
     if (!this.apiKey || !this.campaignId || !this.userToken || !this.sessionId) {
-      throw new Error("SDK hasn't been initialized yet. Call init() first!")
+      callback(new Error("SDK hasn't been initialized yet. Call init() first!"));
     }
 
     if (!emailAddress) {
-      throw new Error("Provide a valid email address");
+      callback(new Error("Provide a valid email address"));
     }
 
     let userProfile;
     if (this.userToken.profile && this.userToken.profile.emailAddress && this.userToken.profile.emailAddress !== emailAddress) {
       // USE CASE: If email address doesn't match the session user profile, this might be another visitor
       // logout();
-      throw new Error("Email address doesn't match existing user profile")
+      callback(new Error("Email address doesn't match existing user profile"));
     } else if (this.userToken.profile && this.userToken.profile.emailAddress && this.userToken.profile.emailAddress === emailAddress) {
        // Use existing profile if the email address matches, no need to sign in
        // USE CASE: Mostly used for users whose profiles (at least with an email address) our systems could find based on their user token hash.
       userProfile = this.userToken.profile;
-    } else { 
+    } else {
       // Sign in and get existing profile details from server if no userProfile exists in session
       // USE CASE: Mostly used for new users, or users whose user token hash didn't exist in our system to fetch a user profile.
-      userProfile = await new Promise(async (resolve, reject) => {
 
-        const data = {
-          token: this.userToken.token,
-          profile: {
-            emailAddress: emailAddress
+      try {
+        userProfile = await new Promise(async (resolve, reject) => {
+
+          const data = {
+            token: this.userToken.token,
+            profile: {
+              emailAddress: emailAddress
+            }
           }
-        }
 
-        const baseUrl = process.env.REWARDS_API_URL;
-        let response = await fetch( baseUrl + 'user_sessions/' + this.sessionId + '/profile', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'x-api-key': this.apiKey!
-          },
-          body: JSON.stringify(data),
+          const baseUrl = process.env.REWARDS_API_URL;
+          try {
+            let response = await fetch( baseUrl + 'user_sessions/' + this.sessionId + '/profile', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'x-api-key': this.apiKey!
+              },
+              body: JSON.stringify(data),
+            });
+            if ('development' === process.env.NODE_ENV) {
+              console.log(response)
+            }
+
+            if (response.ok) {
+              let responseData = await response.json();
+              resolve(responseData.data);
+            } else {
+              if (response.status === 400 || response.status === 404 || response.status === 403) {
+                let responseData = await response.json();
+                reject(responseData);
+              } else {
+                reject(response);
+              }
+            }
+          } catch (err) {
+            callback(err);
+          }
         });
-        if ('development' === process.env.NODE_ENV) {
-          console.log(response)
-        }
-
-        if (response.ok) {
-          let responseData = await response.json();
-          resolve(responseData.data);
-        } else {
-          if (response.status === 400 || response.status === 404 || response.status === 403) {
-            let responseData = await response.json();
-            reject(responseData);
-          } else {
-            reject(response);
-          }
-        }
-        
-      });
+      } catch (err) {
+        callback(err);
+      }
     }
 
     this.userToken.profile = userProfile;
     sessionStorage.setItem('hash', JSON.stringify(this.userToken));
-    callback(userProfile);
+    callback(null, userProfile);
   } 
 
   public async fillUserDetails(userProfile: UserProfile, callback: any) {
@@ -138,60 +155,67 @@ export class WllWebSdk {
       console.log(userProfile);
     }
     if (!this.apiKey || !this.campaignId || !this.userToken || !this.sessionId) {
-      throw new Error("SDK hasn't been initialized yet. Call init() first!")
+      callback(new Error("SDK hasn't been initialized yet. Call init() first!"));
     }
 
     if (!this.userToken.profile || !this.userToken.profile.emailAddress) {
-      throw new Error("The user hasn't been signedUp yet! Sign up using email first");
+      callback(new Error("The user hasn't been signedUp yet! Sign up using email first"));
     }
 
     if (this.userToken.profile && this.userToken.profile.emailAddress && this.userToken.profile.emailAddress !== userProfile.emailAddress) {
       // Something really wrong happened here. The emailAddress matching should have happened during signup.
-      throw new Error("Email address doesn't match existing user profile")
+      callback(new Error("Email address doesn't match existing user profile"));
     }
 
-    const userProfileSaved = await new Promise(async (resolve, reject) => {
+    try {
+      const userProfileSaved = await new Promise(async (resolve, reject) => {
 
-      const data = {
-        token: this.userToken.token,
-        profile: userProfile
-      }
-
-      if ('development' === process.env.NODE_ENV) {
-        console.log("data:" + JSON.stringify(data))
-      }
-
-      const baseUrl = process.env.REWARDS_API_URL;
-      let response = await fetch( baseUrl + 'user_sessions/' + this.sessionId + '/profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'x-api-key': this.apiKey!
-        },
-        body: JSON.stringify(data),
-      });
-      if ('development' === process.env.NODE_ENV) {
-        console.log(response)
-      }
-
-      if (response.ok) {
-        let responseData = await response.json();
-        resolve(responseData.data);
-      } else {
-        if (response.status === 400 || response.status === 404 || response.status === 403) {
-          let responseData = await response.json();
-          reject(responseData);
-        } else {
-          reject(response);
+        const data = {
+          token: this.userToken.token,
+          profile: userProfile
         }
-      }
-      
-    });
 
-    this.userToken.profile = userProfileSaved;
-    sessionStorage.setItem('hash', JSON.stringify(this.userToken));
-    callback(userProfileSaved);
+        if ('development' === process.env.NODE_ENV) {
+          console.log("data:" + JSON.stringify(data))
+        }
+
+        const baseUrl = process.env.REWARDS_API_URL;
+        try {
+          let response = await fetch( baseUrl + 'user_sessions/' + this.sessionId + '/profile', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'x-api-key': this.apiKey!
+            },
+            body: JSON.stringify(data),
+          });
+          if ('development' === process.env.NODE_ENV) {
+            console.log(response)
+          }
+
+          if (response.ok) {
+            let responseData = await response.json();
+            resolve(responseData.data);
+          } else {
+            if (response.status === 400 || response.status === 404 || response.status === 403) {
+              let responseData = await response.json();
+              reject(responseData);
+            } else {
+              reject(response);
+            }
+          }
+        } catch (err) {
+          reject(err);
+        }
+      });
+
+      this.userToken.profile = userProfileSaved;
+      sessionStorage.setItem('hash', JSON.stringify(this.userToken));
+      callback(null, userProfileSaved);
+    } catch (err) {
+      callback(err);
+    }
   }
 
     private getParams(url: string) {
@@ -220,10 +244,17 @@ export class WllWebSdk {
             console.log("got the hash", x.hash);
           }
           window.history.replaceState(null, "", window.location.pathname);
-          // await this.loadScript("../node_modules/wll-web-sdk/dist/pf.min.js");
-          const fingerprintComponents = await this.getFingerprint();
+
+          // Optionally, try getting a fingerprint
+          let fingerprintComponents;
           try {
-            
+            fingerprintComponents = await this.getFingerprint();
+          } catch (err) {
+            if ('development' === process.env.NODE_ENV) {
+              console.error("Error while getting fingerprint: " + JSON.stringify(err))
+            }
+          }
+          try {
             const sessionData: any = await this.createUserSession(x.hash, fingerprintComponents, this.campaignId!);
             if ('development' === process.env.NODE_ENV) {
               console.log(sessionData);
@@ -237,6 +268,7 @@ export class WllWebSdk {
             if ('development' === process.env.NODE_ENV) {
               console.error("Error while creating session: " + JSON.stringify(err))
             }
+            throw err;
           }
         }
     }
@@ -299,29 +331,33 @@ export class WllWebSdk {
       }
 
       const baseUrl = process.env.REWARDS_API_URL;
-      let response = await fetch( baseUrl + 'user_sessions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'x-api-key': this.apiKey!
-        },
-        body: JSON.stringify(data),
-      });
-      if ('development' === process.env.NODE_ENV) {
-        console.log(response)
-      }
-
-      if (response.ok) {
-        let responseData = await response.json();
-        resolve(responseData);
-      } else {
-        if (response.status === 400 || response.status === 404 || response.status === 403) {
-          let responseData = await response.json();
-          reject(responseData);
-        } else {
-          reject(response);
+      try {
+        let response = await fetch( baseUrl + 'user_sessions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'x-api-key': this.apiKey!
+          },
+          body: JSON.stringify(data),
+        });
+        if ('development' === process.env.NODE_ENV) {
+          console.log(response)
         }
+
+        if (response.ok) {
+          let responseData = await response.json();
+          resolve(responseData);
+        } else {
+          if (response.status === 400 || response.status === 404 || response.status === 403) {
+            let responseData = await response.json();
+            reject(responseData);
+          } else {
+            reject(response);
+          }
+        }
+      } catch (err) {
+        reject (err);
       }
       
     });
