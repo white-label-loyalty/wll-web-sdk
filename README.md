@@ -25,7 +25,7 @@ You can also just download these js files and place them in your website's js fo
 Initialize the SDK
 ```js
 var wll = new WllWebSdk.WllWebSdk(); // Get the object
-var apiKey = "abc123"; // API Key that you got on registration
+var apiKey = "abc123"; // API Key that you got during registration
 
 // Initialize the SDK
 const userToken = wll.init(apiKey, "campaign-ABC", 
@@ -39,6 +39,11 @@ const userToken = wll.init(apiKey, "campaign-ABC",
 
 
 # For Contributors
+
+For changing the Base URL of the APIs:
+
+Copy example.babelrc and make a file name .babelrc in the root project directory.
+Replace the value for "process.env.REWARDS_API_URL" with the Base URL.
 
 # TSDX Bootstrap
 
