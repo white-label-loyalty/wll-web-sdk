@@ -1,7 +1,7 @@
 ![npm](https://img.shields.io/npm/v/wll-web-sdk?color=blue)
 ![npm bundle size](https://img.shields.io/bundlephobia/min/wll-web-sdk)
 
-# For Users
+# For Clients
 
 ## Install
 
@@ -22,25 +22,117 @@ You can also just download these js files and place them in your website's js fo
 
 ## Usage
 
-Initialize the SDK
+### 1. Initialize the SDK: init(apiKey: string, campaignId: string, callback)
+Do this at the beginning of your webpage
+
 ```js
 var wll = new WllWebSdk.WllWebSdk(); // Get the object
 var apiKey = "abc123"; // API Key that you got during registration
 
+var campaignId = "Campaign100"; // An ID assigned by the client (you) to uniquely identify this campaign website.
+// Helps track which campaign website the user visited.
+
 // Initialize the SDK
-const userToken = wll.init(apiKey, "campaign-ABC", 
-  userToken => 
-  {
-    console.log("UserToken (Ignore)");
-    console.log(userToken);
-  });
+const userToken = wll.init(apiKey, campaignId, 
+    (error, userToken) => 
+    {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log(userToken); // Ignore, a non-null value is enough to know that the SDK was correctly initialized.
+        // FYI, userToken is used internally to ID a unique visitor.
+      }
+    });
 
 ```
 
+### 2. Get User Details: getExistingUser()
+Returns the UserProfile already fetched, if available.
+
+- Use this after the init() method to check if the WLL SDK was able to correctly identify the user just based on the UserToken.
+- You can also use this to get access to the UserProfile object at any time, for eg, once the user has submitted their email address.
+
+```
+let userProfile = wll.getExistingUser();
+if (userProfile) {
+  console.log("Welcome: " + userProfile.emailAddress);
+}
+
+```
+
+### UserProfile
+UserProfile is a unique profile corresponding to a real-world user. The primary identifier is the email address. WLL SDK progressively builds the UserProfile as a visitor visits multiple campaign websites maintained by the tenant and shares their personal information.
+
+NOTE: The UserProfile object returned by the SDK only contains the field 'emailAddress'. This can be used to personalize the webpage to welcome the user, or to skip email address form entry.
+
+```
+export interface UserProfile {
+    emailAddress: string,
+    givenName?: string,
+    familyName?: string;
+    telephoneNumber?: string;
+    extraFields?: any;
+}
+```
+
+### 3. Submit email address/Sign up using email address: signupUsingEmail(emailAddress: string, callback)
+Submits an email address to uniquely identify the visitor, and links the visitor's activity to an existing UserProfile.
+
+If the getExistingUser() method doesn't return a UserProfile after initializing the SDK, the White Label Loyalty system hasn't been able to uniquely identify the visitor.
+In order to link this visitor's activities to an existing UserProfile (or create a new one, in case a UserProfile doesn't exist in the WLL system), the SDK needs an email address of the user.
+
+NOTE: The WLL Web SDK doesn't handle email address verification, and if needed, would have to be handled by the client.
+
+```
+wll.signupUsingEmail(emailId, (error, userProfile) => {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log(userProfile);
+        userProfileSubmitted = userProfile;
+        alert("This email ID was submitted: " + userProfileSubmitted.emailAddress);
+      }
+    });
+```
+
+## 4. Fill and submit user profile information: fillUserDetails(userProfile: UserProfile, callback)
+Submits user information to update existing UserProfile fields in the WLL system.
+
+NOTE: Use this AFTER getExistingUser() returns a non-null UserProfile. If a UserProfile doesn't exist, first create or link an existing one by asking the user to
+signupUsingEmail().
+
+```
+// ExtraFields is a map of key-value pairs depending on the client's needs
+const extraFields = {
+  policyNumber: policyNumber && policyNumber.length > 0 ? Number(policyNumber) : undefined ,
+  addressStreet,
+  addressCity
+}
+
+// Eg: Build the userProfile using a form
+const userProfile = {
+  emailAddress: userProfileSubmitted.emailAddress,
+  givenName: !givenName || givenName.length === 0 ? undefined : givenName,
+  familyName: !familyName || familyName.length === 0 ? undefined : familyName,
+  telephoneNumber: !telephoneNumber || telephoneNumber.length === 0 ? undefined : telephoneNumber,
+  extraFields
+}
+
+// Submit the userProfile
+wll.fillUserDetails(userProfile, (error, userProfile) => {
+  if (error) {
+    console.log(error);
+  } else {
+    console.log(userProfile);
+    userProfileSubmitted = userProfile;
+    alert("This email ID's profile was submitted: " + userProfileSubmitted.emailAddress);
+  }
+});
+```
 
 # For Contributors
 
-For changing the Base URL of the APIs:
+## Changing the Base URL of the APIs:
 
 Copy example.babelrc and make a file name .babelrc in the root project directory.
 Replace the value for "process.env.REWARDS_API_URL" with the Base URL.
