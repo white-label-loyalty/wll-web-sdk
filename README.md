@@ -67,11 +67,11 @@ NOTE: The UserProfile object returned by the SDK only contains the field 'emailA
 
 ```
 export interface UserProfile {
-    emailAddress: string,
-    givenName?: string,
-    familyName?: string;
+    emailAddress: string, // Mandatory with every UserProfile submission
+    givenName?: string, // First name
+    familyName?: string; // Last name
     telephoneNumber?: string;
-    extraFields?: any;
+    extraFields?: { [key: string]: any }; // Key Value Pairs of any fields needed for more User information
 }
 ```
 
@@ -96,10 +96,10 @@ wll.signupUsingEmail(emailId, (error, userProfile) => {
 ```
 
 ## 4. Fill and submit user profile information: fillUserDetails(userProfile: UserProfile, callback)
-Submits user information to update existing UserProfile fields in the WLL system.
+Submits user information to update existing UserProfile fields in the WLL system. Works by appending fields to the existing UserProfile in the backend. If a UserProfile field submitted has a different (non-null) value than the one in the backend, the new value overrides the older value.
 
 NOTE: Use this AFTER getExistingUser() returns a non-null UserProfile. If a UserProfile doesn't exist, first create or link an existing one by asking the user to
-signupUsingEmail().
+signupUsingEmail(). Use the emailAddress returned to build up the UserProfile below.
 
 ```
 // ExtraFields is a map of key-value pairs depending on the client's needs
