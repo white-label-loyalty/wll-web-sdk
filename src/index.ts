@@ -148,6 +148,32 @@ export class WllWebSdk {
     callback(null, userProfile);
   } 
 
+  /**
+   * Useful for GDPR compliance, or to let the user opt out of using their bio/profile data.
+   * @param isRestricted 
+   * @param callback 
+   */
+  public async setProfileAsRestricted(isRestricted: boolean = true, callback: any) {
+    if (!this.apiKey || !this.campaignId || !this.userToken || !this.sessionId) {
+      callback(new Error("SDK hasn't been initialized yet. Call init() first!"));
+    }
+
+    if (!this.userToken.profile || !this.userToken.profile.emailAddress) {
+      callback(new Error("The user hasn't been signedUp yet! Sign up using email first"));
+    }
+
+    const userProfile: UserProfile = {
+      emailAddress: this.userToken.profile.emailAddress,
+      isRestricted
+      }
+    await this.fillUserDetails(userProfile, callback);
+  }
+
+  /**
+   * Allows a user to update their Profile.
+   * @param userProfile 
+   * @param callback 
+   */
   public async fillUserDetails(userProfile: UserProfile, callback: any) {
 
     if ('development' === process.env.NODE_ENV) {
