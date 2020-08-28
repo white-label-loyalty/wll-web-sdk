@@ -95,7 +95,7 @@ wll.signupUsingEmail(emailId, (error, userProfile) => {
     });
 ```
 
-## 4. Fill and submit user profile information: fillUserDetails(userProfile: UserProfile, callback)
+### 4. Fill and submit user profile information: fillUserDetails(userProfile: UserProfile, callback)
 Submits user information to update existing UserProfile fields in the WLL system. Works by appending fields to the existing UserProfile in the backend. If a UserProfile field submitted has a different (non-null) value than the one in the backend, the new value overrides the older value.
 
 NOTE: Use this AFTER getExistingUser() returns a non-null UserProfile. If a UserProfile doesn't exist, first create or link an existing one by asking the user to
@@ -130,7 +130,7 @@ wll.fillUserDetails(userProfile, (error, userProfile) => {
 });
 ```
 
-## 4. Opt out of Profile use (Useful for GDPR compliance): setProfileAsRestricted(isRestricted: boolean = true, callback: any)
+### 5. Opt out of Profile use (Useful for GDPR compliance): setProfileAsRestricted(isRestricted: boolean = true, callback: any)
 Allow user to opt out of their profile info being used.
 ```
 wll.setProfileAsRestricted(true, (error, userProfile) => {
