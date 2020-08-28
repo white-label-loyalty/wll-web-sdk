@@ -130,6 +130,18 @@ wll.fillUserDetails(userProfile, (error, userProfile) => {
 });
 ```
 
+## 4. Opt out of Profile use (Useful for GDPR compliance): setProfileAsRestricted(isRestricted: boolean = true, callback: any)
+Allow user to opt out of their profile info being used.
+```
+wll.setProfileAsRestricted(true, (error, userProfile) => {
+  if (error) {
+    console.log(error);
+  } else {
+    alert("This email ID's profile was opted out: " + userProfile.emailAddress);
+  }
+});
+```
+
 # For Contributors
 
 ## Changing the Base URL of the APIs:
