@@ -1,5 +1,5 @@
 {
-  "version": "0.2.7",
+  "version": "0.2.8",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -41,5 +41,25 @@
   },
   "dependencies": {
     "fingerprintjs2": "^2.1.2"
-  }
+  },
+  "homepage": "https://github.com/white-label-loyalty/wll-web-sdk#readme",
+  "keywords": [
+    "wll",
+    "white label loyalty",
+    "loyalty",
+    "wll-web-sdk",
+    "sdk",
+    "cdp",
+    "data",
+    "extract",
+    "platform",
+    "customer",
+    "profile",
+    "progressive"
+  ],
+  "bugs": {
+    "url": "https://github.com/white-label-loyalty/wll-web-sdk/issues",
+    "email": "amar@topscreenmedia.com"
+  },
+  "description": "Web SDK for collecting 1st party User Data from a variety of web touch points and integrating with White Label Loyalty's platform"
 }
