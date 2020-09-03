@@ -184,9 +184,9 @@ export class WllWebSdk {
       callback(new Error("SDK hasn't been initialized yet. Call init() first!"));
     }
 
-    if (!this.userToken.profile || !this.userToken.profile.emailAddress) {
-      callback(new Error("The user hasn't been signedUp yet! Sign up using email first"));
-    }
+    // if (!this.userToken.profile || !this.userToken.profile.emailAddress) {
+    //   callback(new Error("The user hasn't been signedUp yet! Sign up using email first"));
+    // }
 
     if (this.userToken.profile && this.userToken.profile.emailAddress && this.userToken.profile.emailAddress !== userProfile.emailAddress) {
       // Something really wrong happened here. The emailAddress matching should have happened during signup.
