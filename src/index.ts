@@ -102,10 +102,7 @@ export class WllWebSdk {
         userProfile = await new Promise(async (resolve, reject) => {
 
           const data = {
-            token: this.userToken.token,
-            profile: {
-              emailAddress: emailAddress
-            }
+            emailAddress: emailAddress
           }
 
           const baseUrl = process.env.REWARDS_API_URL;
@@ -165,7 +162,7 @@ export class WllWebSdk {
     const userProfile: UserProfile = {
       emailAddress: this.userToken.profile.emailAddress,
       isRestricted
-      }
+    }
     await this.fillUserDetails(userProfile, callback);
   }
 
@@ -196,11 +193,8 @@ export class WllWebSdk {
     try {
       const userProfileSaved = await new Promise(async (resolve, reject) => {
 
-        const data = {
-          token: this.userToken.token,
-          profile: userProfile
-        }
-
+        const data = userProfile;
+        
         if ('development' === process.env.NODE_ENV) {
           console.log("data:" + JSON.stringify(data))
         }
