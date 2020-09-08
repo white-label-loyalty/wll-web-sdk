@@ -1,6 +1,6 @@
 import * as Fingerprint2 from 'fingerprintjs2';
 import { UserProfile } from 'types';
-
+import * as geolocator from 'geolocator';
 export class WllWebSdk {
 
   private apiKey?: string;
@@ -274,8 +274,19 @@ export class WllWebSdk {
               console.error("Error while getting fingerprint: " + JSON.stringify(err))
             }
           }
+
+          let locationAndIpInfo;
           try {
-            const sessionData: any = await this.createUserSession(x.hash, fingerprintComponents, this.campaignId!);
+            locationAndIpInfo = await this.getLocationByIP();
+          } catch (err) {
+            // Fail silently
+            if ('development' === process.env.NODE_ENV) {
+              console.error("Error while getting location by IP: " + JSON.stringify(err))
+            }
+          }
+          try {
+
+            const sessionData: any = await this.createUserSession(x.hash, this.campaignId!, fingerprintComponents, locationAndIpInfo);
             if ('development' === process.env.NODE_ENV) {
               console.log(sessionData);
             }
@@ -291,6 +302,30 @@ export class WllWebSdk {
             throw err;
           }
         }
+    }
+
+    private async getLocationByIP() {
+      if ('development' === process.env.NODE_ENV) {
+        console.log("Getting Location by IP");
+      }
+      return new Promise(async (resolve, reject) => {
+        var options = {
+          addressLookup: false,
+        };
+        geolocator.locateByIP(options, function (err: any, location: any) {
+          if ('development' === process.env.NODE_ENV) {
+            console.log(err || location);
+          }
+          if (err) {
+            reject(err)
+          } else if (location) {
+            resolve(location);
+          } else {
+            reject();
+          }
+        });
+      });
+
     }
 
     private async getFingerprint() {
@@ -334,7 +369,7 @@ export class WllWebSdk {
     });
    };
 
-   private async createUserSession(token: string, fingerprint: any, campaignId: string) {
+   private async createUserSession(token: string, campaignId: string, fingerprint?: any, locationAndIpInfo?: any) {
     
     return new Promise(async (resolve, reject) => {
 
@@ -342,7 +377,8 @@ export class WllWebSdk {
         source: 'CAMPAIGN',
         sourceId: campaignId,
         deviceFingerprint: fingerprint,
-        token: token
+        token: token,
+        locationAndIpInfo: locationAndIpInfo
       }
 
       // console.log("data:" + JSON.stringify(data))
