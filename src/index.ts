@@ -1,17 +1,35 @@
 import * as Fingerprint2 from 'fingerprintjs2';
 import { UserProfile } from 'types';
 import * as geolocator from 'geolocator';
+
+export enum Environment {
+  Dev = 'DEV',
+  Staging = 'STAGING',
+  Prod = 'PROD',
+}
 export class WllWebSdk {
 
   private apiKey?: string;
   private campaignId?: string;
   private userToken?: any;
   private sessionId?: string;
+  private baseUrl: string = "https://api.staging.rewards.wlloyalty.net/v1/";
 
-
-  public async init(apiKey: string, campaignId: string, callback: any) {
+  public async init(apiKey: string, campaignId: string, env: Environment = Environment.Staging, callback: any) {
     this.apiKey = apiKey;
     this.campaignId = campaignId;
+    if ('development' === process.env.NODE_ENV) {
+      console.log("Env: " + env);
+    }
+    
+    if (env === Environment.Prod) {
+      this.baseUrl = "https://api.rewards.wlloyalty.net/v1/";
+    } else if(env === Environment.Dev) {
+      this.baseUrl = "http://127.0.0.1:8080/v1/";
+    } else {
+      this.baseUrl = "https://api.staging.rewards.wlloyalty.net/v1/";
+    }
+
     // Check session storage and see if we already have session token and user token
     let sessionUserToken =  sessionStorage.getItem('hash');
     let sessionId =  sessionStorage.getItem('sessionId');
@@ -105,7 +123,7 @@ export class WllWebSdk {
             emailAddress: emailAddress
           }
 
-          const baseUrl = process.env.REWARDS_API_URL;
+          const baseUrl = this.baseUrl;
           try {
             let response = await fetch( baseUrl + 'user_sessions/' + this.sessionId + '/profile', {
               method: 'POST',
@@ -199,7 +217,7 @@ export class WllWebSdk {
           console.log("data:" + JSON.stringify(data))
         }
 
-        const baseUrl = process.env.REWARDS_API_URL;
+        const baseUrl = this.baseUrl;
         try {
           let response = await fetch( baseUrl + 'user_sessions/' + this.sessionId + '/profile', {
             method: 'POST',
@@ -391,7 +409,7 @@ export class WllWebSdk {
         console.log(this.apiKey);
       }
 
-      const baseUrl = process.env.REWARDS_API_URL;
+      const baseUrl = this.baseUrl;
       try {
         let response = await fetch( baseUrl + 'user_sessions', {
           method: 'POST',

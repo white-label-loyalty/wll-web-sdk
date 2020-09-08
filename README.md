@@ -29,12 +29,12 @@ Do this at the beginning of your webpage
 ```js
 var wll = new WllWebSdk.WllWebSdk(); // Get the object
 var apiKey = "abc123"; // API Key that you got during registration
-
+var env = "PROD"; // Decides whether this is 'live' data or being used for just testing. You can choose between STAGING, PROD and DEV (only useful for contributors/developers)
 var campaignId = "Campaign100"; // An ID assigned by the client (you) to uniquely identify this campaign website.
 // Helps track which campaign website the user visited.
 
 // Initialize the SDK
-const userToken = wll.init(apiKey, campaignId, 
+const userToken = wll.init(apiKey, campaignId, env
     (error, userToken) => 
     {
       if (error) {
@@ -53,7 +53,7 @@ Returns the UserProfile already fetched, if available.
 - Use this after the init() method to check if the WLL SDK was able to correctly identify the user just based on the UserToken.
 - You can also use this to get access to the UserProfile object at any time, for eg, once the user has submitted their email address.
 
-```
+```js
 let userProfile = wll.getExistingUser();
 if (userProfile) {
   console.log("Welcome: " + userProfile.emailAddress);
@@ -66,7 +66,7 @@ UserProfile is a unique profile corresponding to a real-world user. The primary 
 
 NOTE: The UserProfile object returned by the SDK only contains the field 'emailAddress'. This can be used to personalize the webpage to welcome the user, or to skip email address form entry.
 
-```
+```js
 export interface UserProfile {
     emailAddress: string, // Mandatory with every UserProfile submission
     givenName?: string, // First name
@@ -80,11 +80,11 @@ export interface UserProfile {
 Submits an email address to uniquely identify the visitor, and links the visitor's activity to an existing UserProfile.
 
 If the getExistingUser() method doesn't return a UserProfile after initializing the SDK, the White Label Loyalty system hasn't been able to uniquely identify the visitor.
-In order to link this visitor's activities to an existing UserProfile (or create a new one, in case a UserProfile doesn't exist in the WLL system), the SDK needs an email address of the user.
+In order to link this visitor's activities to an existing UserProfile (or create a new one, in case a UserProfile doesn't exist in the WLL system), the SDK needs an email address of the user, at least.
 
 NOTE: The WLL Web SDK doesn't handle email address verification, and if needed, would have to be handled by the client.
 
-```
+```js
 wll.signupUsingEmail(emailId, (error, userProfile) => {
       if (error) {
         console.log(error);
@@ -99,10 +99,9 @@ wll.signupUsingEmail(emailId, (error, userProfile) => {
 ### 4. Fill and submit user profile information: fillUserDetails(userProfile: UserProfile, callback)
 Submits user information to update existing UserProfile fields in the WLL system. Works by appending fields to the existing UserProfile in the backend. If a UserProfile field submitted has a different (non-null) value than the one in the backend, the new value overrides the older value.
 
-NOTE: Use this AFTER getExistingUser() returns a non-null UserProfile. If a UserProfile doesn't exist, first create or link an existing one by asking the user to
-signupUsingEmail(). Use the emailAddress returned to build up the UserProfile below.
+NOTE: If you only want to ask the user to submit their email Id, use the signupUsingEmail() method. If you need email Id and other profile details, use this method.
 
-```
+```js
 // ExtraFields is a map of key-value pairs depending on the client's needs
 const extraFields = {
   policyNumber: policyNumber && policyNumber.length > 0 ? Number(policyNumber) : undefined ,
@@ -133,7 +132,7 @@ wll.fillUserDetails(userProfile, (error, userProfile) => {
 
 ### 5. Opt out of Profile use (Useful for GDPR compliance): setProfileAsRestricted(isRestricted: boolean = true, callback: any)
 Allow user to opt out of their profile info being used.
-```
+```js
 wll.setProfileAsRestricted(true, (error, userProfile) => {
   if (error) {
     console.log(error);
@@ -147,8 +146,14 @@ wll.setProfileAsRestricted(true, (error, userProfile) => {
 
 ## Changing the Base URL of the APIs:
 
-Copy example.babelrc and make a file name .babelrc in the root project directory.
-Replace the value for "process.env.REWARDS_API_URL" with the Base URL.
+You can change the Base URL of the APIs using the environment provided during init().
+```js
+export enum Environment {
+    Dev = 'DEV',
+    Staging = 'STAGING',
+    Prod = 'PROD',
+}
+```
 
 # TSDX Bootstrap
 
