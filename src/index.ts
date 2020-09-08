@@ -45,6 +45,7 @@ export class WllWebSdk {
       this.sessionId = sessionId;
       this.userToken = JSON.parse(sessionUserToken);
       callback(null, this.userToken);
+      return;
     } else {
       // if session id isn't available, make a new session
       if( document.readyState !== 'loading' ) {
@@ -54,8 +55,10 @@ export class WllWebSdk {
           try {
             const userToken = await this.getHashTokenAndFingerprint();
             callback(null, userToken);
+            return;
           } catch (err) {
             callback(err);
+            return;
           }
           
       } else {
@@ -67,8 +70,10 @@ export class WllWebSdk {
             try {
               const userToken = await _this.getHashTokenAndFingerprint();
               callback(null, userToken);
+              return;
             } catch (err) {
               callback(err);
+              return;
             }
           });
       }
@@ -97,10 +102,12 @@ export class WllWebSdk {
 
     if (!this.apiKey || !this.campaignId || !this.userToken || !this.sessionId) {
       callback(new Error("SDK hasn't been initialized yet. Call init() first!"));
+      return;
     }
 
-    if (!emailAddress) {
+    if (!emailAddress || emailAddress.length === 0) {
       callback(new Error("Provide a valid email address"));
+      return;
     }
 
     let userProfile;
@@ -108,6 +115,7 @@ export class WllWebSdk {
       // USE CASE: If email address doesn't match the session user profile, this might be another visitor
       // logout();
       callback(new Error("Email address doesn't match existing user profile"));
+      return;
     } else if (this.userToken.profile && this.userToken.profile.emailAddress && this.userToken.profile.emailAddress === emailAddress) {
        // Use existing profile if the email address matches, no need to sign in
        // USE CASE: Mostly used for users whose profiles (at least with an email address) our systems could find based on their user token hash.
@@ -151,10 +159,12 @@ export class WllWebSdk {
             }
           } catch (err) {
             callback(err);
+            return;
           }
         });
       } catch (err) {
         callback(err);
+        return;
       }
     }
 
@@ -171,10 +181,12 @@ export class WllWebSdk {
   public async setProfileAsRestricted(isRestricted: boolean = true, callback: any) {
     if (!this.apiKey || !this.campaignId || !this.userToken || !this.sessionId) {
       callback(new Error("SDK hasn't been initialized yet. Call init() first!"));
+      return;
     }
 
     if (!this.userToken.profile || !this.userToken.profile.emailAddress) {
       callback(new Error("The user hasn't been signedUp yet! Sign up using email first"));
+      return;
     }
 
     const userProfile: UserProfile = {
@@ -197,15 +209,18 @@ export class WllWebSdk {
     }
     if (!this.apiKey || !this.campaignId || !this.userToken || !this.sessionId) {
       callback(new Error("SDK hasn't been initialized yet. Call init() first!"));
+      return;
     }
 
-    // if (!this.userToken.profile || !this.userToken.profile.emailAddress) {
-    //   callback(new Error("The user hasn't been signedUp yet! Sign up using email first"));
-    // }
+    if (!userProfile.emailAddress || userProfile.emailAddress.length === 0) {
+      callback(new Error("Provide a valid email address"));
+      return;
+    }
 
     if (this.userToken.profile && this.userToken.profile.emailAddress && this.userToken.profile.emailAddress !== userProfile.emailAddress) {
       // Something really wrong happened here. The emailAddress matching should have happened during signup.
       callback(new Error("Email address doesn't match existing user profile"));
+      return;
     }
 
     try {
@@ -251,8 +266,10 @@ export class WllWebSdk {
       this.userToken.profile = userProfileSaved;
       sessionStorage.setItem('hash', JSON.stringify(this.userToken));
       callback(null, userProfileSaved);
+      return;
     } catch (err) {
       callback(err);
+      return;
     }
   }
 
