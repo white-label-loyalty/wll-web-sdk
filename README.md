@@ -15,6 +15,7 @@ Or import the minified packages from CDN
 # Add these lines at the top of your <body> or <head> in your HTML webpage
 
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/fingerprintjs2@2.1.0/dist/fingerprint2.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/geolocator/2.1.5/geolocator.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/wll-web-sdk@<LATEST-VERSION>/dist/wllwebsdk.umd.production.min.js"></script>
 ```
 
