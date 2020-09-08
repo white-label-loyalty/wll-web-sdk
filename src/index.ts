@@ -312,6 +312,9 @@ export class WllWebSdk {
         var options = {
           addressLookup: false,
         };
+        if (!geolocator) {
+          reject(new Error("Couldn't find geolocator module"))
+        }
         geolocator.locateByIP(options, function (err: any, location: any) {
           if ('development' === process.env.NODE_ENV) {
             console.log(err || location);
@@ -332,8 +335,10 @@ export class WllWebSdk {
       if ('development' === process.env.NODE_ENV) {
         console.log("Getting fingerprint")
       }
-      return new Promise(async (resolve) => {
-        
+      return new Promise(async (resolve, reject) => {
+            if (!Fingerprint2) {
+              reject(new Error("Couldn't find Fingerprint2 module"))
+            }
             setTimeout(async function () {
                 Fingerprint2.get(async function (components: any) {
                   if ('development' === process.env.NODE_ENV) {
