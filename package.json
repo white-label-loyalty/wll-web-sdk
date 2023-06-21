@@ -17,7 +17,6 @@
     "lint": "tsdx lint",
     "prepare": "tsdx build --name WllWebSdk --format cjs,esm,umd"
   },
-  "peerDependencies": {},
   "husky": {
     "hooks": {
       "pre-commit": "tsdx lint"
@@ -40,7 +39,8 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "fingerprintjs2": "^2.1.2"
+    "fingerprintjs2": "^2.1.2",
+    "geolocator": "^2.1.5"
   },
   "homepage": "https://github.com/white-label-loyalty/wll-web-sdk#readme",
   "keywords": [
