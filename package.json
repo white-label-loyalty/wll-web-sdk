@@ -61,5 +61,9 @@
     "url": "https://github.com/white-label-loyalty/wll-web-sdk/issues",
     "email": "amar@topscreenmedia.com"
   },
-  "description": "Web SDK for collecting 1st party User Data from a variety of web touch points and integrating with White Label Loyalty's platform"
+  "description": "Web SDK for collecting 1st party User Data from a variety of web touch points and integrating with White Label Loyalty's platform",
+  "volta": {
+    "node": "14.20.1",
+    "yarn": "1.22.18"
+  }
 }

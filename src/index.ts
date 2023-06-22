@@ -1,6 +1,6 @@
 import * as Fingerprint2 from 'fingerprintjs2';
-import { UserProfile } from 'types';
 import * as geolocator from 'geolocator';
+import { UserProfile } from 'types';
 
 export enum Environment {
   Dev = 'DEV',
@@ -68,7 +68,7 @@ export class WllWebSdk {
         }
       } else {
         const _this = this;
-        document.addEventListener('DOMContentLoaded', async function () {
+        document.addEventListener('DOMContentLoaded', async function() {
           if ('development' === process.env.NODE_ENV) {
             console.log('Init sdk, document was not ready, place code here');
           }
@@ -419,7 +419,7 @@ export class WllWebSdk {
       if (!geolocator) {
         reject(new Error("Couldn't find geolocator module"));
       }
-      geolocator.locateByIP(options, function (err: any, location: any) {
+      geolocator.locateByIP(options, function(err: any, location: any) {
         if ('development' === process.env.NODE_ENV) {
           console.log(err || location);
         }
@@ -442,8 +442,8 @@ export class WllWebSdk {
       if (!Fingerprint2) {
         reject(new Error("Couldn't find Fingerprint2 module"));
       }
-      setTimeout(async function () {
-        Fingerprint2.get(async function (components: any) {
+      setTimeout(async function() {
+        Fingerprint2.get(async function(components: any) {
           if ('development' === process.env.NODE_ENV) {
             console.log(components); // an array of components: {key: ..., value: ...}
           }
