@@ -343,6 +343,10 @@ export class WllWebSdk {
   }
 
   private async getHashTokenAndFingerprint() {
+    if (typeof window === 'undefined') {
+      // window is not defined, return immediately
+      return;
+    }
     const x = this.getParams(window.location.href);
     if ('development' === process.env.NODE_ENV) {
       console.log('params', x);
