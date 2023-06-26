@@ -1,5 +1,5 @@
 {
-  "version": "0.4.1",
+  "version": "0.4.2",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -17,7 +17,6 @@
     "lint": "tsdx lint",
     "prepare": "tsdx build --name WllWebSdk --format cjs,esm,umd"
   },
-  "peerDependencies": {},
   "husky": {
     "hooks": {
       "pre-commit": "tsdx lint"
@@ -40,7 +39,8 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "fingerprintjs2": "^2.1.2"
+    "fingerprintjs2": "^2.1.2",
+    "geolocator": "^2.1.5"
   },
   "homepage": "https://github.com/white-label-loyalty/wll-web-sdk#readme",
   "keywords": [
@@ -61,5 +61,9 @@
     "url": "https://github.com/white-label-loyalty/wll-web-sdk/issues",
     "email": "amar@topscreenmedia.com"
   },
-  "description": "Web SDK for collecting 1st party User Data from a variety of web touch points and integrating with White Label Loyalty's platform"
+  "description": "Web SDK for collecting 1st party User Data from a variety of web touch points and integrating with White Label Loyalty's platform",
+  "volta": {
+    "node": "14.20.1",
+    "yarn": "1.22.18"
+  }
 }

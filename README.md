@@ -12,11 +12,26 @@ $ npm install wll-web-sdk
 Or import the minified packages from CDN
 
 ```html
-# Add these lines at the top of your <body> or <head> in your HTML webpage
+# Add these lines at the top of your
+<body>
+  or
+  <head>
+    in your HTML webpage
 
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/fingerprintjs2@2.1.0/dist/fingerprint2.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/geolocator/2.1.5/geolocator.min.js"></script>
-<script type="text/javascript" src="https://unpkg.com/wll-web-sdk@<LATEST-VERSION>/dist/wllwebsdk.umd.production.min.js"></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/fingerprintjs2@2.1.0/dist/fingerprint2.min.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/geolocator/2.1.5/geolocator.min.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://unpkg.com/wll-web-sdk@<LATEST-VERSION>/dist/wllwebsdk.umd.production.min.js"
+    ></script>
+  </head>
+</body>
 ```
 
 You can also just download these js files and place them in your website's js folder
@@ -24,6 +39,7 @@ You can also just download these js files and place them in your website's js fo
 ## Usage
 
 ### 1. Initialize the SDK: init(apiKey: string, campaignId: string, callback)
+
 Do this at the beginning of your webpage
 
 ```js
@@ -35,7 +51,7 @@ var campaignId = "Campaign100"; // An ID assigned by the client (you) to uniquel
 
 // Initialize the SDK
 const userToken = wll.init(apiKey, campaignId, env
-    (error, userToken) => 
+    (error, userToken) =>
     {
       if (error) {
         console.log(error);
@@ -48,6 +64,7 @@ const userToken = wll.init(apiKey, campaignId, env
 ```
 
 ### 2. Get User Details: getExistingUser()
+
 Returns the UserProfile already fetched, if available.
 
 - Use this after the init() method to check if the WLL SDK was able to correctly identify the user just based on the UserToken.
@@ -56,27 +73,28 @@ Returns the UserProfile already fetched, if available.
 ```js
 let userProfile = wll.getExistingUser();
 if (userProfile) {
-  console.log("Welcome: " + userProfile.emailAddress);
+  console.log('Welcome: ' + userProfile.emailAddress);
 }
-
 ```
 
 ### UserProfile
+
 UserProfile is a unique profile corresponding to a real-world user. The primary identifier is the email address. WLL SDK progressively builds the UserProfile as a visitor visits multiple campaign websites maintained by the tenant and shares their personal information.
 
 NOTE: The UserProfile object returned by the SDK only contains the field 'emailAddress'. This can be used to personalize the webpage to welcome the user, or to skip email address form entry.
 
 ```js
 export interface UserProfile {
-    emailAddress: string, // Mandatory with every UserProfile submission
-    givenName?: string, // First name
-    familyName?: string; // Last name
-    telephoneNumber?: string;
-    extraFields?: { [key: string]: any }; // Key Value Pairs of any fields needed for more User information
+  emailAddress: string; // Mandatory with every UserProfile submission
+  givenName?: string; // First name
+  familyName?: string; // Last name
+  telephoneNumber?: string;
+  extraFields?: { [key: string]: any }; // Key Value Pairs of any fields needed for more User information
 }
 ```
 
 ### 3. Submit email address/Sign up using email address: signupUsingEmail(emailAddress: string, callback)
+
 Submits an email address to uniquely identify the visitor, and links the visitor's activity to an existing UserProfile.
 
 If the getExistingUser() method doesn't return a UserProfile after initializing the SDK, the White Label Loyalty system hasn't been able to uniquely identify the visitor.
@@ -86,17 +104,18 @@ NOTE: The WLL Web SDK doesn't handle email address verification, and if needed, 
 
 ```js
 wll.signupUsingEmail(emailId, (error, userProfile) => {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log(userProfile);
-        userProfileSubmitted = userProfile;
-        alert("This email ID was submitted: " + userProfileSubmitted.emailAddress);
-      }
-    });
+  if (error) {
+    console.log(error);
+  } else {
+    console.log(userProfile);
+    userProfileSubmitted = userProfile;
+    alert('This email ID was submitted: ' + userProfileSubmitted.emailAddress);
+  }
+});
 ```
 
 ### 4. Fill and submit user profile information: fillUserDetails(userProfile: UserProfile, callback)
+
 Submits user information to update existing UserProfile fields in the WLL system. Works by appending fields to the existing UserProfile in the backend. If a UserProfile field submitted has a different (non-null) value than the one in the backend, the new value overrides the older value.
 
 NOTE: If you only want to ask the user to submit their email Id, use the signupUsingEmail() method. If you need email Id and other profile details, use this method.
@@ -104,19 +123,23 @@ NOTE: If you only want to ask the user to submit their email Id, use the signupU
 ```js
 // ExtraFields is a map of key-value pairs depending on the client's needs
 const extraFields = {
-  policyNumber: policyNumber && policyNumber.length > 0 ? Number(policyNumber) : undefined ,
+  policyNumber:
+    policyNumber && policyNumber.length > 0 ? Number(policyNumber) : undefined,
   addressStreet,
-  addressCity
-}
+  addressCity,
+};
 
 // Eg: Build the userProfile using a form
 const userProfile = {
   emailAddress: userProfileSubmitted.emailAddress,
   givenName: !givenName || givenName.length === 0 ? undefined : givenName,
   familyName: !familyName || familyName.length === 0 ? undefined : familyName,
-  telephoneNumber: !telephoneNumber || telephoneNumber.length === 0 ? undefined : telephoneNumber,
-  extraFields
-}
+  telephoneNumber:
+    !telephoneNumber || telephoneNumber.length === 0
+      ? undefined
+      : telephoneNumber,
+  extraFields,
+};
 
 // Submit the userProfile
 wll.fillUserDetails(userProfile, (error, userProfile) => {
@@ -125,13 +148,18 @@ wll.fillUserDetails(userProfile, (error, userProfile) => {
   } else {
     console.log(userProfile);
     userProfileSubmitted = userProfile;
-    alert("This email ID's profile was submitted: " + userProfileSubmitted.emailAddress);
+    alert(
+      "This email ID's profile was submitted: " +
+        userProfileSubmitted.emailAddress
+    );
   }
 });
 ```
 
 ### 5. Opt out of Profile use (Useful for GDPR compliance): setProfileAsRestricted(isRestricted: boolean = true, callback: any)
+
 Allow user to opt out of their profile info being used.
+
 ```js
 wll.setProfileAsRestricted(true, (error, userProfile) => {
   if (error) {
@@ -147,6 +175,7 @@ wll.setProfileAsRestricted(true, (error, userProfile) => {
 ## Changing the Base URL of the APIs:
 
 You can change the Base URL of the APIs using the environment provided during init().
+
 ```js
 export enum Environment {
     Dev = 'DEV',
